@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Loan EMI Calculator – LendingLeaf</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --green: #2d7a4f;
+            --green-dark: #1a5c38;
+            --green-light: #3a9e67;
+            --green-xlight: #e8f7ef;
+            --green-bg: #f0faf4;
+            --green-border: #c3e6d2;
+            --dark: #0f2419;
+            --text: #1e3a2a;
+            --muted: #5a7a68;
+            --border: #d4e8dc;
+            --surface: #f7fbf9;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 4px rgba(45, 122, 79, 0.08);
+            --shadow: 0 2px 16px rgba(45, 122, 79, 0.10);
+            --shadow-md: 0 6px 28px rgba(45, 122, 79, 0.16);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 6px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 15px;
+            line-height: 1.5
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: var(--shadow-sm)
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-decoration: none
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--green), var(--green-dark));
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .logo-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white
+        }
+
+        .logo-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.18rem;
+            color: var(--dark);
+            white-space: nowrap
+        }
+
+        .logo-text span {
+            color: var(--green)
+        }
+
+        .header-cta {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+            white-space: nowrap
+        }
+
+        .header-cta:hover {
+            background: var(--green-light)
+        }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: white;
+            padding: 40px 24px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")
+        }
+
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.6rem, 4vw, 2.3rem);
+            font-weight: 400;
+            margin-bottom: 8px;
+            position: relative
+        }
+
+        .hero p {
+            font-size: 0.92rem;
+            opacity: .85;
+            max-width: 500px;
+            margin: 0 auto 20px;
+            position: relative
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            position: relative
+        }
+
+        .h-badge {
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .25);
+            border-radius: 20px;
+            padding: 5px 13px;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .h-badge svg {
+            width: 12px;
+            height: 12px;
+            fill: currentColor
+        }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 28px 16px 60px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+            align-items: start
+        }
+
+        @media(max-width:860px) {
+            .grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden
+        }
+
+        .card-head {
+            background: var(--green-bg);
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--green-border);
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .card-head svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--green);
+            flex-shrink: 0
+        }
+
+        .card-head h2 {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--green);
+            letter-spacing: .01em
+        }
+
+        .card-body {
+            padding: 20px
+        }
+
+        /* ── TABS ── */
+        .tab-row {
+            display: flex;
+            gap: 4px;
+            background: var(--green-bg);
+            border-bottom: 1px solid var(--green-border);
+            padding: 8px 12px
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 7px 10px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .2s
+        }
+
+        .tab-btn.active {
+            background: var(--green);
+            color: white
+        }
+
+        .tab-panel {
+            display: none
+        }
+
+        .tab-panel.active {
+            display: block
+        }
+
+        /* ── FORM FIELDS ── */
+        .field {
+            margin-bottom: 18px
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 7px
+        }
+
+        .val-pill {
+            font-size: .86rem;
+            font-weight: 700;
+            color: var(--green);
+            background: var(--green-bg);
+            padding: 2px 10px;
+            border-radius: 14px;
+            border: 1px solid var(--green-border)
+        }
+
+        /* number input */
+        .input-wrap {
+            display: flex;
+            align-items: center;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            transition: border-color .2s;
+            background: white
+        }
+
+        .input-wrap:focus-within {
+            border-color: var(--green)
+        }
+
+        .input-prefix {
+            padding: 0 10px;
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--muted);
+            background: var(--green-bg);
+            height: 38px;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        .input-wrap input[type=number] {
+            border: none;
+            outline: none;
+            padding: 8px 10px;
+            font-family: inherit;
+            font-size: .9rem;
+            font-weight: 600;
+            color: var(--text);
+            width: 100%;
+            background: transparent
+        }
+
+        .input-wrap input[type=number]::-webkit-outer-spin-button,
+        .input-wrap input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none
+        }
+
+        /* slider */
+        input[type=range] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 5px;
+            border-radius: 3px;
+            background: var(--green-border);
+            outline: none;
+            cursor: pointer;
+            margin-top: 2px
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 2px 6px rgba(45, 122, 79, .35);
+            cursor: pointer;
+            transition: transform .15s
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--green);
+            border: none;
+            cursor: pointer
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15)
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: 4px
+        }
+
+        /* select */
+        select {
+            width: 100%;
+            padding: 9px 36px 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: .88rem;
+            font-weight: 600;
+            color: var(--text);
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a7a68' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color .2s;
+            outline: none
+        }
+
+        select:focus {
+            border-color: var(--green)
+        }
+
+        /* chips */
+        .chips {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap
+        }
+
+        .chip {
+            padding: 6px 13px;
+            border-radius: 16px;
+            border: 1.5px solid var(--border);
+            font-size: .8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .18s;
+            color: var(--muted);
+            background: white;
+            user-select: none
+        }
+
+        .chip.active {
+            background: var(--green);
+            border-color: var(--green);
+            color: white
+        }
+
+        /* ── RESULT SUMMARY ── */
+        .result-summary {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            border-radius: var(--radius-sm);
+            padding: 18px 16px;
+            color: white;
+            margin-bottom: 20px
+        }
+
+        .rs-main {
+            text-align: center;
+            margin-bottom: 14px
+        }
+
+        .rs-main .rs-label {
+            font-size: .8rem;
+            opacity: .8;
+            margin-bottom: 4px
+        }
+
+        .rs-main .rs-emi {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.6rem;
+            font-weight: 400;
+            letter-spacing: -.5px;
+            line-height: 1.1
+        }
+
+        .rs-main .rs-sub {
+            font-size: .8rem;
+            opacity: .7;
+            margin-top: 2px
+        }
+
+        .rs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            border-top: 1px solid rgba(255, 255, 255, .2);
+            padding-top: 14px
+        }
+
+        .rs-item .rs-il {
+            font-size: .7rem;
+            opacity: .72;
+            margin-bottom: 2px
+        }
+
+        .rs-item .rs-iv {
+            font-size: .95rem;
+            font-weight: 700
+        }
+
+        /* ── DONUT CHART ── */
+        .chart-wrap {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px 0;
+            flex-wrap: wrap
+        }
+
+        .donut-container {
+            position: relative;
+            flex-shrink: 0;
+            width: 140px;
+            height: 140px
+        }
+
+        .donut-svg {
+            width: 140px;
+            height: 140px;
+            transform: rotate(-90deg)
+        }
+
+        .donut-track {
+            fill: none;
+            stroke: var(--green-border);
+            stroke-width: 18
+        }
+
+        .donut-fill {
+            fill: none;
+            stroke-width: 18;
+            stroke-linecap: butt;
+            transition: stroke-dasharray .5s ease
+        }
+
+        .donut-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center
+        }
+
+        .donut-pct {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--green)
+        }
+
+        .donut-lbl {
+            font-size: .65rem;
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .chart-legend {
+            flex: 1;
+            min-width: 140px
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            margin-bottom: 12px
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px
+        }
+
+        .legend-label {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 1px
+        }
+
+        .legend-value {
+            font-size: .92rem;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        /* ── BREAKEVEN ── */
+        .breakeven-bar {
+            margin: 16px 0 0
+        }
+
+        .be-label {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 600
+        }
+
+        .be-track {
+            height: 8px;
+            background: var(--green-border);
+            border-radius: 4px;
+            overflow: hidden
+        }
+
+        .be-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--green), var(--green-light));
+            transition: width .5s ease
+        }
+
+        /* ── AMORTIZATION TABLE ── */
+        .amort-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .amort-header h3 {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--green-bg);
+            border: 1px solid var(--green-border);
+            border-radius: 8px;
+            padding: 3px
+        }
+
+        .vt-btn {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: .75rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--muted);
+            background: transparent;
+            transition: all .18s
+        }
+
+        .vt-btn.active {
+            background: var(--green);
+            color: white
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .8rem;
+            min-width: 340px
+        }
+
+        thead tr {
+            background: var(--green-bg)
+        }
+
+        th {
+            padding: 9px 10px;
+            text-align: right;
+            font-weight: 700;
+            color: var(--green);
+            font-size: .75rem;
+            border-bottom: 1.5px solid var(--green-border);
+            white-space: nowrap
+        }
+
+        th:first-child {
+            text-align: left
+        }
+
+        td {
+            padding: 8px 10px;
+            text-align: right;
+            color: var(--text);
+            border-bottom: 1px solid var(--border)
+        }
+
+        td:first-child {
+            text-align: left;
+            font-weight: 600;
+            color: var(--muted)
+        }
+
+        tr:last-child td {
+            border-bottom: none
+        }
+
+        tr:nth-child(even) td {
+            background: #fbfdfb
+        }
+
+        .total-row td {
+            background: var(--green-bg) !important;
+            font-weight: 700;
+            color: var(--text);
+            border-top: 2px solid var(--green-border)
+        }
+
+        .total-row td:first-child {
+            color: var(--green)
+        }
+
+        /* ── PREPAYMENT ── */
+        .prepay-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px
+        }
+
+        .prepay-result {
+            background: var(--green-bg);
+            border: 1px solid var(--green-border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center
+        }
+
+        .pr-label {
+            font-size: .72rem;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 3px
+        }
+
+        .pr-val {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--green)
+        }
+
+        .pr-sub {
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: 1px
+        }
+
+        /* ── TIPS ── */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        @media(max-width:500px) {
+            .tips-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .tip-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            transition: box-shadow .2s
+        }
+
+        .tip-card:hover {
+            box-shadow: var(--shadow)
+        }
+
+        .tip-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--green-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px
+        }
+
+        .tip-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--green)
+        }
+
+        .tip-title {
+            font-size: .82rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 3px
+        }
+
+        .tip-desc {
+            font-size: .75rem;
+            color: var(--muted);
+            line-height: 1.45
+        }
+
+        /* ── LENDER CARDS ── */
+        .lender-card {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            transition: box-shadow .2s, border-color .2s;
+            animation: fadeUp .3s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .lender-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--green-border)
+        }
+
+        .lender-card.best {
+            border-color: var(--green);
+            background: var(--green-bg)
+        }
+
+        .lc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 10px
+        }
+
+        .lc-name {
+            font-size: .95rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .best-tag {
+            font-size: .65rem;
+            font-weight: 700;
+            background: var(--green);
+            color: white;
+            padding: 2px 7px;
+            border-radius: 8px;
+            letter-spacing: .02em
+        }
+
+        .lc-sub {
+            font-size: .72rem;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        .roi-badge {
+            text-align: right;
+            flex-shrink: 0
+        }
+
+        .roi-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--green)
+        }
+
+        .roi-lbl {
+            font-size: .65rem;
+            color: var(--muted)
+        }
+
+        .lc-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            border-top: 1px solid var(--border);
+            padding-top: 9px;
+            margin-bottom: 10px
+        }
+
+        .stat-l {
+            font-size: .67rem;
+            color: var(--muted);
+            margin-bottom: 1px
+        }
+
+        .stat-v {
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        .apply-btn {
+            display: block;
+            width: 100%;
+            padding: 9px;
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: .86rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .1s;
+            text-align: center
+        }
+
+        .apply-btn:hover {
+            background: var(--green-light)
+        }
+
+        .apply-btn:active {
+            transform: scale(.98)
+        }
+
+        /* ── SECTION DIVIDER ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 24px 0 16px
+        }
+
+        .section-divider span {
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--muted);
+            white-space: nowrap
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        /* ── INFO BOX ── */
+        .info-box {
+            background: var(--green-bg);
+            border: 1px solid var(--green-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: .8rem;
+            color: var(--muted);
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            line-height: 1.45
+        }
+
+        .info-box svg {
+            width: 14px;
+            height: 14px;
+            fill: var(--green);
+            flex-shrink: 0;
+            margin-top: 1px
+        }
+
+        /* ── CTA BANNER ── */
+        .cta-banner {
+            background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 24px;
+            text-align: center;
+            margin-top: 24px
+        }
+
+        .cta-banner h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 6px
+        }
+
+        .cta-banner p {
+            font-size: .85rem;
+            opacity: .85;
+            margin-bottom: 16px
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: white;
+            color: var(--green);
+            border: none;
+            padding: 10px 28px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s
+        }
+
+        .cta-btn:hover {
+            opacity: .92
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            padding: 20px 24px;
+            text-align: center;
+            font-size: .75rem;
+            color: var(--muted);
+            line-height: 1.6
+        }
+
+        footer a {
+            color: var(--green);
+            text-decoration: none
+        }
+
+        /* ── MOBILE ── */
+        @media(max-width:600px) {
+            header {
+                padding: 0 14px
+            }
+
+            .logo-text {
+                font-size: 1.05rem
+            }
+
+            .hero {
+                padding: 28px 16px 22px
+            }
+
+            .container {
+                padding: 16px 12px 40px
+            }
+
+            .card-body {
+                padding: 14px
+            }
+
+            .field-row {
+                grid-template-columns: 1fr
+            }
+
+            .rs-emi {
+                font-size: 2rem
+            }
+
+            .rs-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            .chart-wrap {
+                gap: 14px
+            }
+
+            .donut-container {
+                width: 120px;
+                height: 120px
+            }
+
+            .donut-svg {
+                width: 120px;
+                height: 120px
+            }
+
+            .lc-stats {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            .prepay-grid {
+                grid-template-columns: 1fr
+            }
+
+            .tips-grid {
+                grid-template-columns: 1fr
+            }
+
+            .amort-header {
+                flex-direction: column;
+                align-items: flex-start
+            }
+        }
+
+        @media(max-width:400px) {
+            .h-badge {
+                font-size: .72rem;
+                padding: 4px 10px
+            }
+
+            .rs-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px
+            }
+
+            .rs-grid .rs-item:last-child {
+                grid-column: span 2;
+                text-align: center
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <a href="#" class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L3 7v10l9 5 9-5V7L12 2zm0 2.18L19 8.5v7L12 19.82 5 15.5v-7L12 4.18z" />
+                    <path d="M12 8a4 4 0 100 8 4 4 0 000-8zm0 2a2 2 0 110 4 2 2 0 010-4z" />
+                </svg>
+            </div>
+            <span class="logo-text">Lending<span>Leaf</span></span>
+        </a>
+        <button class="header-cta"
+            onclick="window.open('https://lendingleaf.in/loans/instant-home-loan','_blank')">Apply for Home Loan
+            →</button>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero">
+        <h1>Home Loan EMI Calculator</h1>
+        <p>Instantly calculate your monthly EMI, total interest payable, and plan your repayment schedule</p>
+        <div class="hero-badges">
+            <div class="h-badge"><svg viewBox="0 0 10 10">
+                    <circle cx="5" cy="5" r="4" />
+                </svg> Free to use</div>
+            <div class="h-badge"><svg viewBox="0 0 10 10">
+                    <path d="M2 5l2.5 2.5L8 3" />
+                </svg> Instant results</div>
+            <div class="h-badge"><svg viewBox="0 0 10 10">
+                    <rect x="1" y="1" width="8" height="8" rx="1.5" />
+                </svg> Amortization table</div>
+            <div class="h-badge"><svg viewBox="0 0 10 10">
+                    <path d="M5 1v8M1 5h8" />
+                </svg> Prepayment analysis</div>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="container">
+        <div class="grid">
+
+            <!-- LEFT: INPUTS -->
+            <div>
+                <div class="card">
+                    <div class="card-head">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93V18h-2v1.93C7.06 19.44 4.56 16.94 4.07 14H6v-2H4.07C4.56 9.06 7.06 6.56 10 6.07V8h2V6.07c2.94.49 5.44 2.99 5.93 5.93H16v2h1.93c-.49 2.94-2.99 5.44-5.93 5.93z" />
+                        </svg>
+                        <h2>Loan Details</h2>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Loan Amount -->
+                        <div class="field">
+                            <label>Loan Amount <span class="val-pill" id="lbl-amount">₹50,00,000</span></label>
+                            <div class="input-wrap" style="margin-bottom:8px">
+                                <span class="input-prefix">₹</span>
+                                <input type="number" id="inp-amount" value="5000000" min="100000" max="50000000"
+                                    step="50000">
+                            </div>
+                            <input type="range" id="sl-amount" min="100000" max="50000000" value="5000000" step="50000">
+                            <div class="slider-labels"><span>₹1 L</span><span>₹500 L</span></div>
+                        </div>
+
+                        <!-- Interest Rate -->
+                        <div class="field">
+                            <label>Annual Interest Rate <span class="val-pill" id="lbl-rate">8.50%</span></label>
+                            <div class="input-wrap" style="margin-bottom:8px">
+                                <span class="input-prefix">%</span>
+                                <input type="number" id="inp-rate" value="8.5" min="1" max="20" step="0.05">
+                            </div>
+                            <input type="range" id="sl-rate" min="1" max="20" value="8.5" step="0.05">
+                            <div class="slider-labels"><span>1%</span><span>20%</span></div>
+                        </div>
+
+                        <!-- Loan Tenure -->
+                        <div class="field">
+                            <label>Loan Tenure <span class="val-pill" id="lbl-tenure">20 Years</span></label>
+                            <div class="field-row">
+                                <div>
+                                    <div class="input-wrap">
+                                        <span class="input-prefix">Yr</span>
+                                        <input type="number" id="inp-tenure-yr" value="20" min="1" max="30" step="1">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="input-wrap">
+                                        <span class="input-prefix">Mo</span>
+                                        <input type="number" id="inp-tenure-mo" value="0" min="0" max="11" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" id="sl-tenure" min="12" max="360" value="240" step="12"
+                                style="margin-top:8px">
+                            <div class="slider-labels"><span>1 yr</span><span>30 yrs</span></div>
+                        </div>
+
+                        <!-- Extra fields row -->
+                        <div class="field-row">
+                            <div class="field" style="margin-bottom:0">
+                                <label style="margin-bottom:6px">Processing Fee</label>
+                                <div class="input-wrap">
+                                    <span class="input-prefix">%</span>
+                                    <input type="number" id="inp-fee" value="0.5" min="0" max="3" step="0.1">
+                                </div>
+                            </div>
+                            <div class="field" style="margin-bottom:0">
+                                <label style="margin-bottom:6px">Start Month</label>
+                                <select id="sel-month">
+                                    <option value="0">January</option>
+                                    <option value="1">February</option>
+                                    <option value="2">March</option>
+                                    <option value="3">April</option>
+                                    <option value="4">May</option>
+                                    <option value="5">June</option>
+                                    <option value="6" selected>July</option>
+                                    <option value="7">August</option>
+                                    <option value="8">September</option>
+                                    <option value="9">October</option>
+                                    <option value="10">November</option>
+                                    <option value="11">December</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"><span>Prepayment (Optional)</span></div>
+
+                        <div class="field-row" style="margin-bottom:14px">
+                            <div class="field" style="margin-bottom:0">
+                                <label style="margin-bottom:6px">Annual Prepayment <span class="val-pill"
+                                        id="lbl-prepay">₹0</span></label>
+                                <input type="range" id="sl-prepay" min="0" max="500000" value="0" step="10000">
+                                <div class="slider-labels"><span>₹0</span><span>₹5 L</span></div>
+                            </div>
+                            <div class="field" style="margin-bottom:0">
+                                <label style="margin-bottom:6px">From Year</label>
+                                <select id="sel-prepay-yr">
+                                    <option value="1">Year 1</option>
+                                    <option value="2">Year 2</option>
+                                    <option value="3" selected>Year 3</option>
+                                    <option value="4">Year 4</option>
+                                    <option value="5">Year 5</option>
+                                    <option value="6">Year 6</option>
+                                    <option value="7">Year 7</option>
+                                    <option value="8">Year 8</option>
+                                    <option value="9">Year 9</option>
+                                    <option value="10">Year 10</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                            </svg>
+                            <span>Home loan rates currently range from <strong>8.35%–9.50% p.a.</strong> (SBI, HDFC,
+                                ICICI). Check with your bank for exact rates based on your CIBIL score.</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: RESULTS -->
+            <div>
+
+                <!-- EMI Summary -->
+                <div class="card" style="margin-bottom:20px">
+                    <div class="card-head">
+                        <svg viewBox="0 0 24 24">
+                            <path
+                                d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                        </svg>
+                        <h2>Your EMI Breakdown</h2>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="result-summary">
+                            <div class="rs-main">
+                                <div class="rs-label">Monthly EMI</div>
+                                <div class="rs-emi" id="res-emi">₹43,391</div>
+                                <div class="rs-sub">per month for <span id="res-tenure-disp">20 years</span></div>
+                            </div>
+                            <div class="rs-grid">
+                                <div class="rs-item">
+                                    <div class="rs-il">Principal</div>
+                                    <div class="rs-iv" id="res-principal">₹50.00 L</div>
+                                </div>
+                                <div class="rs-item">
+                                    <div class="rs-il">Total Interest</div>
+                                    <div class="rs-iv" id="res-interest">₹54.14 L</div>
+                                </div>
+                                <div class="rs-item">
+                                    <div class="rs-il">Total Amount</div>
+                                    <div class="rs-iv" id="res-total">₹1.04 Cr</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Donut Chart -->
+                        <div class="chart-wrap">
+                            <div class="donut-container">
+                                <svg class="donut-svg" viewBox="0 0 140 140">
+                                    <circle class="donut-track" cx="70" cy="70" r="51" />
+                                    <circle class="donut-fill" id="donut-principal" cx="70" cy="70" r="51"
+                                        stroke="#2d7a4f" stroke-dasharray="0 320" stroke-dashoffset="0" />
+                                    <circle class="donut-fill" id="donut-interest" cx="70" cy="70" r="51"
+                                        stroke="#a8dbbf" stroke-dasharray="0 320" stroke-dashoffset="0" />
+                                </svg>
+                                <div class="donut-center">
+                                    <div class="donut-pct" id="donut-pct">48%</div>
+                                    <div class="donut-lbl">Principal</div>
+                                </div>
+                            </div>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background:var(--green)"></div>
+                                    <div>
+                                        <div class="legend-label">Principal Amount</div>
+                                        <div class="legend-value" id="leg-principal">₹50,00,000</div>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background:#a8dbbf"></div>
+                                    <div>
+                                        <div class="legend-label">Total Interest</div>
+                                        <div class="legend-value" id="leg-interest">₹54,13,853</div>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background:#d4e8dc"></div>
+                                    <div>
+                                        <div class="legend-label">Processing Fee</div>
+                                        <div class="legend-value" id="leg-fee">₹25,000</div>
+                                    </div>
+                                </div>
+                                <div class="breakeven-bar">
+                                    <div class="be-label">Interest vs Principal ratio</div>
+                                    <div class="be-track">
+                                        <div class="be-fill" id="be-fill" style="width:52%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prepayment Savings -->
+                        <div id="prepay-section" style="display:none">
+                            <div class="section-divider"><span>Prepayment Savings</span></div>
+                            <div class="prepay-grid">
+                                <div class="prepay-result">
+                                    <div class="pr-label">Months Saved</div>
+                                    <div class="pr-val" id="pr-months">–</div>
+                                    <div class="pr-sub">earlier closure</div>
+                                </div>
+                                <div class="prepay-result">
+                                    <div class="pr-label">Interest Saved</div>
+                                    <div class="pr-val" id="pr-saved">–</div>
+                                    <div class="pr-sub">total savings</div>
+                                </div>
+                                <div class="prepay-result">
+                                    <div class="pr-label">New Tenure</div>
+                                    <div class="pr-val" id="pr-tenure">–</div>
+                                    <div class="pr-sub">with prepayment</div>
+                                </div>
+                                <div class="prepay-result">
+                                    <div class="pr-label">New Total Cost</div>
+                                    <div class="pr-val" id="pr-total">–</div>
+                                    <div class="pr-sub">revised amount</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Amortization Table -->
+                <div class="card" style="margin-bottom:20px">
+                    <div class="card-head">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2z" />
+                        </svg>
+                        <h2>Repayment Schedule</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="amort-header">
+                            <h3>Year-by-Year Breakdown</h3>
+                            <div class="view-toggle">
+                                <button class="vt-btn active" id="btn-yearly"
+                                    onclick="switchView('yearly')">Yearly</button>
+                                <button class="vt-btn" id="btn-monthly" onclick="switchView('monthly')">Monthly</button>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table id="amort-table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left">Year</th>
+                                        <th>EMI Paid</th>
+                                        <th>Principal</th>
+                                        <th>Interest</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="amort-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <div class="tip-icon"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg></div>
+                        <div class="tip-title">Higher down payment = lower EMI</div>
+                        <div class="tip-desc">Pay 20–30% upfront to reduce principal & save lakhs in interest over the
+                            tenure.</div>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-icon"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l7.59-7.59L21 8l-9 9z" />
+                            </svg></div>
+                        <div class="tip-title">Good CIBIL = better rates</div>
+                        <div class="tip-desc">A score above 750 can get you rates 0.5–1% lower — saving ₹5–10 L on a
+                            ₹50L loan.</div>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-icon"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 3.21-1.81 6-4.72 7.28L13 17v5h5l-1.22-1.22C19.91 19.07 22 15.76 22 12c0-5.18-3.95-9.45-9-9.95zM11 2.05C5.95 2.55 2 6.82 2 12c0 3.76 2.09 7.07 5.22 8.78L6 22h5v-5l-2.28 2.28C7.81 18 6 15.21 6 12c0-4.08 3.05-7.44 7-7.93V2.05z" />
+                            </svg></div>
+                        <div class="tip-title">Prepay when you have surplus</div>
+                        <div class="tip-desc">Even ₹1–2 L prepayment per year can cut your tenure by 3–5 years
+                            significantly.</div>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-icon"><svg viewBox="0 0 24 24">
+                                <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z" />
+                            </svg></div>
+                        <div class="tip-title">Compare rates across lenders</div>
+                        <div class="tip-desc">A 0.25% rate difference on ₹50L over 20 years saves approx. ₹1.8 L in
+                            interest.</div>
+                    </div>
+                </div>
+
+                <!-- CTA Banner -->
+                <div class="cta-banner">
+                    <h3>Ready to Apply for Your Home Loan?</h3>
+                    <p>Get personalized offers from 10+ RBI-registered lenders. 100% digital, no hidden fees.</p>
+                    <button class="cta-btn"
+                        onclick="window.open('https://lendingleaf.in/loans/instant-home-loan','_blank')">Check
+                        Eligibility — It's Free</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <strong>LendingLeaf</strong> — a product of Digitar Media Pvt. Ltd. &nbsp;|&nbsp;
+        G-48, Sector-03, Noida, UP 201301 &nbsp;|&nbsp;
+        <a href="mailto:support@lendingleaf.in">support@lendingleaf.in</a> &nbsp;|&nbsp;
+        <a href="tel:01204308780">0120-4308780</a><br>
+        <span style="margin-top:6px;display:inline-block;max-width:700px">
+            This calculator provides estimates for planning purposes only. Actual EMI, interest rates, and loan terms
+            are subject to lender approval and policies. LendingLeaf is not a lender — we connect users with
+            RBI-registered banks &amp; NBFCs.
+        </span>
+    </footer>
+
+    <script>
+        // ── STATE ──────────────────────────────────────────────────────────────────────
+        const S = {
+            amount: 5000000,
+            rate: 8.5,
+            tenureMonths: 240,
+            fee: 0.5,
+            prepay: 0,
+            prepayFromYear: 3,
+            startMonth: 6,
+            viewMode: 'yearly'
+        };
+
+        // ── FORMATTERS ─────────────────────────────────────────────────────────────────
+        function fmtINR(n) {
+            if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2) + ' Cr';
+            if (n >= 100000) return '₹' + (n / 100000).toFixed(2) + ' L';
+            return '₹' + Math.round(n).toLocaleString('en-IN');
+        }
+        function fmtFull(n) {
+            return '₹' + Math.round(n).toLocaleString('en-IN');
+        }
+        function fmtTenure(months) {
+            const y = Math.floor(months / 12), m = months % 12;
+            if (m === 0) return y + (y === 1 ? ' year' : ' years');
+            return y + 'y ' + m + 'm';
+        }
+        function monthName(idx) {
+            return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][idx];
+        }
+
+        // ── EMI FORMULA ────────────────────────────────────────────────────────────────
+        function calcEMI(P, annualRate, months) {
+            const r = annualRate / 12 / 100;
+            if (r === 0) return P / months;
+            return P * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+        }
+
+        // ── FULL AMORTIZATION (with prepayment) ───────────────────────────────────────
+        function buildSchedule() {
+            const r = S.rate / 12 / 100;
+            const emi = calcEMI(S.amount, S.rate, S.tenureMonths);
+            let bal = S.amount;
+            let schedule = [];
+            let month = 0;
+            const prepayStart = (S.prepayFromYear - 1) * 12;
+
+            while (bal > 1 && month < S.tenureMonths + 120) {
+                const interest = bal * r;
+                let principal = emi - interest;
+                if (principal > bal) principal = bal;
+                bal -= principal;
+
+                // annual prepayment at year boundary
+                let prepayAmt = 0;
+                if (S.prepay > 0 && month >= prepayStart && (month - prepayStart) % 12 === 11) {
+                    prepayAmt = Math.min(S.prepay, bal);
+                    bal -= prepayAmt;
+                }
+                if (bal < 1) bal = 0;
+
+                schedule.push({ month: month + 1, interest, principal, prepay: prepayAmt, balance: bal });
+                month++;
+                if (bal <= 0) break;
+            }
+            return schedule;
+        }
+
+        // ── RENDER ─────────────────────────────────────────────────────────────────────
+        function render() {
+            const emi = calcEMI(S.amount, S.rate, S.tenureMonths);
+            const totalPaid = emi * S.tenureMonths;
+            const totalInterestBase = totalPaid - S.amount;
+            const processingFee = S.amount * S.fee / 100;
+
+            // Build schedule
+            const schedule = buildSchedule();
+            const actualMonths = schedule.length;
+            const totalInterestActual = schedule.reduce((a, b) => a + b.interest, 0);
+            const totalPrepay = schedule.reduce((a, b) => a + b.prepay, 0);
+            const totalCost = S.amount + totalInterestActual;
+
+            // ── Summary ──
+            document.getElementById('res-emi').textContent = fmtFull(Math.round(emi));
+            document.getElementById('res-tenure-disp').textContent = fmtTenure(S.tenureMonths);
+            document.getElementById('res-principal').textContent = fmtINR(S.amount);
+            document.getElementById('res-interest').textContent = fmtINR(totalInterestActual);
+            document.getElementById('res-total').textContent = fmtINR(totalCost + processingFee);
+
+            // ── Legend ──
+            document.getElementById('leg-principal').textContent = fmtFull(S.amount);
+            document.getElementById('leg-interest').textContent = fmtFull(Math.round(totalInterestActual));
+            document.getElementById('leg-fee').textContent = fmtFull(Math.round(processingFee));
+
+            // ── Donut ──
+            const circ = 2 * Math.PI * 51; // ~320.4
+            const total = S.amount + totalInterestActual;
+            const pPct = S.amount / total;
+            const iPct = totalInterestActual / total;
+            const pArc = pPct * circ;
+            const iArc = iPct * circ;
+
+            const dp = document.getElementById('donut-principal');
+            const di = document.getElementById('donut-interest');
+            dp.setAttribute('stroke-dasharray', pArc + ' ' + (circ - pArc));
+            dp.setAttribute('stroke-dashoffset', '0');
+            di.setAttribute('stroke-dasharray', iArc + ' ' + (circ - iArc));
+            di.setAttribute('stroke-dashoffset', -(pArc) + '');
+            document.getElementById('donut-pct').textContent = Math.round(pPct * 100) + '%';
+            document.getElementById('be-fill').style.width = Math.round(iPct * 100) + '%';
+
+            // ── Prepayment savings ──
+            const hasPrepay = S.prepay > 0;
+            document.getElementById('prepay-section').style.display = hasPrepay ? 'block' : 'none';
+            if (hasPrepay) {
+                const monthsSaved = S.tenureMonths - actualMonths;
+                const interestSaved = totalInterestBase - totalInterestActual;
+                document.getElementById('pr-months').textContent = monthsSaved > 0 ? monthsSaved + ' months' : '0';
+                document.getElementById('pr-saved').textContent = fmtINR(Math.max(0, interestSaved));
+                document.getElementById('pr-tenure').textContent = fmtTenure(actualMonths);
+                document.getElementById('pr-total').textContent = fmtINR(totalCost);
+            }
+
+            // ── Amortization Table ──
+            renderTable(schedule);
+        }
+
+        function renderTable(schedule) {
+            const tbody = document.getElementById('amort-body');
+            let rows = '';
+
+            if (S.viewMode === 'yearly') {
+                // Aggregate by year
+                const years = {};
+                schedule.forEach(row => {
+                    const yr = Math.ceil(row.month / 12);
+                    if (!years[yr]) years[yr] = { emi: 0, principal: 0, interest: 0, balance: 0 };
+                    years[yr].emi += row.principal + row.interest;
+                    years[yr].principal += row.principal + row.prepay;
+                    years[yr].interest += row.interest;
+                    years[yr].balance = row.balance;
+                });
+
+                let totEMI = 0, totPrin = 0, totInt = 0;
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+                Object.keys(years).forEach(yr => {
+                    const d = years[yr];
+                    const startMo = ((S.startMonth + (parseInt(yr) - 1) * 12) % 12);
+                    const endMo = ((S.startMonth + parseInt(yr) * 12 - 1) % 12);
+                    const startY = 2025 + Math.floor(S.startMonth / 12) + Math.floor(((parseInt(yr) - 1) * 12 + S.startMonth) / 12);
+                    totEMI += d.emi; totPrin += d.principal; totInt += d.interest;
+                    rows += `<tr>
+        <td>Year ${yr}</td>
+        <td>${fmtFull(Math.round(d.emi))}</td>
+        <td>${fmtFull(Math.round(d.principal))}</td>
+        <td>${fmtFull(Math.round(d.interest))}</td>
+        <td>${fmtFull(Math.round(d.balance))}</td>
+      </tr>`;
+                });
+
+                rows += `<tr class="total-row">
+      <td>Total</td>
+      <td>${fmtFull(Math.round(totEMI))}</td>
+      <td>${fmtFull(Math.round(totPrin))}</td>
+      <td>${fmtFull(Math.round(totInt))}</td>
+      <td>₹0</td>
+    </tr>`;
+
+                // Update headers
+                document.querySelector('#amort-table thead tr').innerHTML = `
+      <th style="text-align:left">Year</th>
+      <th>Total EMI</th><th>Principal</th><th>Interest</th><th>Balance</th>`;
+            } else {
+                // Monthly — show all rows (cap at 120 for perf)
+                const shown = schedule.slice(0, 120);
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+                shown.forEach(row => {
+                    const moIdx = (S.startMonth + row.month - 1) % 12;
+                    const yr = 2025 + Math.floor((S.startMonth + row.month - 1) / 12);
+                    rows += `<tr>
+        <td>${monthNames[moIdx]} ${yr}</td>
+        <td>${fmtFull(Math.round(row.principal + row.interest))}</td>
+        <td>${fmtFull(Math.round(row.principal))}</td>
+        <td>${fmtFull(Math.round(row.interest))}</td>
+        <td>${fmtFull(Math.round(row.balance))}</td>
+      </tr>`;
+                });
+
+                if (schedule.length > 120) {
+                    rows += `<tr><td colspan="5" style="text-align:center;color:var(--muted);font-style:italic;padding:10px">Showing first 120 months. Switch to yearly view for full schedule.</td></tr>`;
+                }
+
+                document.querySelector('#amort-table thead tr').innerHTML = `
+      <th style="text-align:left">Month</th>
+      <th>EMI</th><th>Principal</th><th>Interest</th><th>Balance</th>`;
+            }
+
+            tbody.innerHTML = rows;
+        }
+
+        function switchView(mode) {
+            S.viewMode = mode;
+            document.getElementById('btn-yearly').classList.toggle('active', mode === 'yearly');
+            document.getElementById('btn-monthly').classList.toggle('active', mode === 'monthly');
+            render();
+        }
+
+        // ── SLIDER FILL ────────────────────────────────────────────────────────────────
+        function fillSlider(el) {
+            const pct = (el.value - el.min) / (el.max - el.min) * 100;
+            el.style.background = `linear-gradient(to right,#2d7a4f ${pct}%,#c3e6d2 ${pct}%)`;
+        }
+
+        // ── BIND INPUTS ────────────────────────────────────────────────────────────────
+        function bindSync(sliderId, inputId, stateKey, fmt, onchange) {
+            const sl = document.getElementById(sliderId);
+            const inp = document.getElementById(inputId);
+
+            sl.addEventListener('input', () => {
+                const v = +sl.value;
+                S[stateKey] = v;
+                if (inp) inp.value = fmt ? fmt(v) : v;
+                fillSlider(sl);
+                render();
+            });
+
+            if (inp) {
+                inp.addEventListener('input', () => {
+                    let v = +inp.value;
+                    if (v < +sl.min) v = +sl.min;
+                    if (v > +sl.max) v = +sl.max;
+                    S[stateKey] = v;
+                    sl.value = v;
+                    fillSlider(sl);
+                    render();
+                });
+            }
+            fillSlider(sl);
+        }
+
+        // Amount
+        bindSync('sl-amount', 'inp-amount', 'amount', null, null);
+
+        // Rate
+        (function () {
+            const sl = document.getElementById('sl-rate');
+            const inp = document.getElementById('inp-rate');
+            sl.addEventListener('input', () => {
+                S.rate = +sl.value;
+                inp.value = (+sl.value).toFixed(2);
+                fillSlider(sl);
+                document.getElementById('lbl-rate').textContent = (+sl.value).toFixed(2) + '%';
+                render();
+            });
+            inp.addEventListener('input', () => {
+                let v = parseFloat(inp.value) || 1;
+                v = Math.min(20, Math.max(1, v));
+                S.rate = v;
+                sl.value = v;
+                fillSlider(sl);
+                document.getElementById('lbl-rate').textContent = v.toFixed(2) + '%';
+                render();
+            });
+            fillSlider(sl);
+        })();
+
+        // Tenure slider (in months, displayed as yr+mo)
+        (function () {
+            const sl = document.getElementById('sl-tenure');
+            const inpYr = document.getElementById('inp-tenure-yr');
+            const inpMo = document.getElementById('inp-tenure-mo');
+
+            function updateFromMonths(m) {
+                S.tenureMonths = m;
+                inpYr.value = Math.floor(m / 12);
+                inpMo.value = m % 12;
+                document.getElementById('lbl-tenure').textContent = fmtTenure(m);
+                sl.value = m;
+                fillSlider(sl);
+            }
+
+            sl.addEventListener('input', () => updateFromMonths(+sl.value) || render());
+
+            inpYr.addEventListener('input', () => {
+                const m = (+inpYr.value || 0) * 12 + (+inpMo.value || 0);
+                updateFromMonths(Math.min(360, Math.max(12, m)));
+                render();
+            });
+            inpMo.addEventListener('input', () => {
+                const m = (+inpYr.value || 0) * 12 + (+inpMo.value || 0);
+                updateFromMonths(Math.min(360, Math.max(12, m)));
+                render();
+            });
+            fillSlider(sl);
+        })();
+
+        // Prepay slider
+        (function () {
+            const sl = document.getElementById('sl-prepay');
+            fillSlider(sl);
+            sl.addEventListener('input', () => {
+                S.prepay = +sl.value;
+                document.getElementById('lbl-prepay').textContent = S.prepay === 0 ? '₹0' : fmtINR(S.prepay);
+                fillSlider(sl);
+                render();
+            });
+        })();
+
+        // Prepay from year
+        document.getElementById('sel-prepay-yr').addEventListener('change', e => {
+            S.prepayFromYear = +e.target.value;
+            render();
+        });
+
+        // Start month
+        document.getElementById('sel-month').addEventListener('change', e => {
+            S.startMonth = +e.target.value;
+            render();
+        });
+
+        // Fee input
+        document.getElementById('inp-fee').addEventListener('input', e => {
+            S.fee = parseFloat(e.target.value) || 0;
+            render();
+        });
+
+        // ── LABEL SYNC for amount slider ──────────────────────────────────────────────
+        document.getElementById('sl-amount').addEventListener('input', () => {
+            document.getElementById('lbl-amount').textContent = fmtINR(+document.getElementById('sl-amount').value);
+        });
+        document.getElementById('inp-amount').addEventListener('input', () => {
+            const v = +document.getElementById('inp-amount').value;
+            document.getElementById('lbl-amount').textContent = fmtINR(v);
+        });
+
+        // ── INIT LABELS ───────────────────────────────────────────────────────────────
+        document.getElementById('lbl-amount').textContent = fmtINR(S.amount);
+        document.getElementById('lbl-rate').textContent = S.rate.toFixed(2) + '%';
+        document.getElementById('lbl-tenure').textContent = fmtTenure(S.tenureMonths);
+        document.getElementById('lbl-prepay').textContent = '₹0';
+
+        // ── INIT ALL SLIDERS ──────────────────────────────────────────────────────────
+        ['sl-amount', 'sl-rate', 'sl-tenure', 'sl-prepay'].forEach(id => {
+            fillSlider(document.getElementById(id));
+        });
+
+        // ── INITIAL RENDER ────────────────────────────────────────────────────────────
+        render();
+    </script>
+</body>
+
+</html>
